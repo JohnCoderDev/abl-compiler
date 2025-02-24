@@ -1,16 +1,18 @@
 block-level on error undo, throw.
-using ABLC.*.
-using progress.Json.ObjectModel.*.
+using progress.Json.ObjectModel.* from propath.
+using ablc.* from propath.
+using ablc.third.json.* from propath.
 
-class ABLC.ABLCompiler:
-    define private property compilerOptions as JsonObject get. set. 
+class ablc.ABLCompiler:
+    define public property compilerOptions as JsonObject get. private set.
     
     constructor ABLCompiler():
         assign compilerOptions = new JsonObject().
     end constructor.
     
-    method public ABLCompiler parseJsonFile(pJsonPath as character):
+    method public ABLCompiler parseJsonObject(pJson as JsonObject):
        
+       assign compilerOptions = pJson. 
        return this-object.
     end method.
     
@@ -20,7 +22,9 @@ class ABLC.ABLCompiler:
         return this-object.
     end method.
     
-    
+    method public void validateABLCompilerJsonObject(pJson as JsonObject):
+        // do the logic for the validation
+    end method.
     
     method public ABLCompiler appendTargetDirectory(pDirectory as character):
         if not compilerOptions:has('targetDirectories') then compilerOptions:add('targetDirectories', new JsonArray()).

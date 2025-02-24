@@ -1,15 +1,17 @@
 block-level on error undo, throw.
 using ablc.third.tester.* from propath.
 using ablc.third.tester.errors.* from propath.
+using ablc.third.tester.interfaces.* from propath.
 using progress.json.ObjectModel.* from propath.
 
-class ablc.third.tester.ABLTestCase inherits ABLAsserter abstract:
-    define public property totalRunned as int64 get. private set.
-    define public property totalSuccess as int64 get. private set.
-    define public property totalFailed as int64 get. private set.
-    define public property totalErrors as int64 get. private set.
+class ablc.third.tester.ABLTestCase inherits ABLAsserter abstract implements ITestObject:
+    define public property totalRunned as int64 get. set.
+    define public property totalSuccess as int64 get. set.
+    define public property totalFailed as int64 get. set.
+    define public property totalErrors as int64 get. set.
+    define public property totalTime as decimal get. set.
     
-    define private temp-table testResult
+    define private temp-table testsResults
         field className as character
         field methodName as character
         field testResult as character
@@ -39,13 +41,13 @@ class ablc.third.tester.ABLTestCase inherits ABLAsserter abstract:
             assign currentMethod = methods[ix].
             
             if currentMethod:name matches pPattern then do:
-                create testResult.
+                create testsResults.
                
                 assign
                     totalRunned = totalRunned + 1
-                    testResult.className = currentMethod:originatingClass:typeName
-                    testResult.methodName = currentMethod:name
-                    testResult.timestampStart = now.
+                    testsResults.className = currentMethod:originatingClass:typeName
+                    testsResults.methodName = currentMethod:name
+                    testsResults.timestampStart = now.
                     
                 if currentMethod:numParameters > 0 then do:
                     return error new ABLTestCaseWithParametersError().
@@ -55,35 +57,36 @@ class ablc.third.tester.ABLTestCase inherits ABLAsserter abstract:
                 
                 assign
                     totalSuccess = totalSuccess + 1
-                    testResult.testResult = "success"
-                    testResult.testMessage = "ok".
+                    testsResults.testResult = "success"
+                    testsResults.testMessage = "ok".
             end.
            
             catch objAssertionError as ABLAssertionError:
                 assign
                     totalFailed = totalFailed + 1
-                    testResult.testResult = "failed"
-                    testResult.testMessage = objAssertionError:getMessage(1)
-                    testResult.lastErrorCode = objAssertionError:getMessageNum(1).
+                    testsResults.testResult = "failed"
+                    testsResults.testMessage = objAssertionError:getMessage(1)
+                    testsResults.lastErrorCode = objAssertionError:getMessageNum(1).
             end catch.
             
             catch objError as progress.lang.error:
                 define variable iy as integer no-undo.
                 
-                assign testResult.testResult = "error".
+                assign testsResults.testResult = "error".
                 do iy = 1 to objError:numMessages: 
                     assign
                         totalErrors = totalErrors + 1
-                        testResult.testMessage = testResult.testMessage + ";" + objError:getMessage(iy)
-                        testResult.lastErrorCode = objError:getMessageNum(iy).
+                        testsResults.testMessage = testsResults.testMessage + ";" + objError:getMessage(iy)
+                        testsResults.lastErrorCode = objError:getMessageNum(iy).
                 end.
             end catch.
             
             finally:
                 if currentMethod:name matches pPattern then do:
                     assign
-                        testResult.timestampEnd = now
-                        testResult.totalTime = testResult.timestampEnd - testResult.timestampStart.
+                        testsResults.timestampEnd = now
+                        testsResults.totalTime = testsResults.timestampEnd - testsResults.timestampStart
+                        totalTime = totalTime + testsResults.totalTime.
                 end.
                 teardown().
             end finally.
@@ -92,16 +95,20 @@ class ablc.third.tester.ABLTestCase inherits ABLAsserter abstract:
     end method.
     
     method public ABLTestCase clearTestsResults():
-        empty temp-table testResult.
+        empty temp-table testsResults.
         assign
             totalRunned = 0
             totalSuccess = 0
             totalFailed = 0
-            totalErrors = 0.
+            totalErrors = 0
+            totalTime = 0.
         return this-object.
     end method.
     
     method public JsonObject getTestsResultsObject():
+        if not temp-table testsResults:has-records then 
+            return error new NoTestsResultsError().
+            
         define variable resultJsonArray as JsonArray no-undo.
         define variable testsJsonObject as JsonObject no-undo.
         
@@ -109,7 +116,7 @@ class ablc.third.tester.ABLTestCase inherits ABLAsserter abstract:
             resultJsonArray = new JsonArray()
             testsJsonObject = new JsonObject().
         
-        temp-table testResult:write-json("JsonArray", resultJsonArray, true, ?, false, true).
+        temp-table testsResults:write-json("JsonArray", resultJsonArray, true, ?, false, true).
         
         testsJsonObject:add("meta", new JsonObject()).
         testsJsonObject:add("results", resultJsonArray).
@@ -120,18 +127,23 @@ class ablc.third.tester.ABLTestCase inherits ABLAsserter abstract:
         testsJsonObject:getJsonObject("meta"):add("successRating", totalSuccess / totalRunned).
         testsJsonObject:getJsonObject("meta"):add("failedRating", totalFailed / totalRunned).
         testsJsonObject:getJsonObject("meta"):add("errorsRating", totalErrors / totalRunned).
+        testsJsonObject:getJsonObject("meta"):add("totalTime", totalTime).
         
         return testsJsonObject.
     end method.
     
-    method public handle getTestResultTableHandle():
-        return temp-table testResult:handle.
+    method public longchar getTableHtml():
+        return ABLTestResultsTableHtmlSerializer:serializeTestsTable(this-object).
+    end method.
+    
+    method public handle getTestsResultsTableHandle():
+        return temp-table testsResults:handle.
     end method.
     
     method public void showResultsTable():
-        for each testResult:
+        for each testsResults:
             display 
-                testResult
+                testsResults
                 with scrollable.
         end.
     end method.
