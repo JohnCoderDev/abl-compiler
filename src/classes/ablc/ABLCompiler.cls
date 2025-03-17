@@ -79,7 +79,7 @@ class classes.ablc.ABLCompiler:
     end method.
     
     method public ABLCompiler addSourceDirectory(pPath as character):
-        return addSourceDirectory(pPath, false).
+        return addSourceDirectory(pPath, true).
     end method.
     
     method public ABLCompiler addSourceDirectory(pPath as character, pReplicateStructure as logical):
