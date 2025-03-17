@@ -91,6 +91,11 @@ class classes.ablc.ABLCompiler:
             if not sourcePathTester:isDir() or not sourcePathTester:pathExists() then do:
                 return error new ABLCDirectoryDoesNotExist(pPath).
             end.
+            
+            if not propath matches "*" + pPath + "*" then do:
+                assign propath = pPath + "," + propath.
+            end.
+            
             create sourceDirectories.
             assign 
                 sourceDirectories.directoryPath = pPath
