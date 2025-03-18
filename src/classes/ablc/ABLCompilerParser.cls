@@ -40,9 +40,19 @@ class classes.ablc.ABLCompilerParser:
         assign auxArray = pCompilerSpecs:getJsonArray("targets").
         do idx = 1 to auxArray:length:
             assign auxObject = auxArray:getJsonObject(idx).
-            ablc:addTargetDirectory(
-                auxObject:getCharacter("folder")
-            ).    
+            if auxObject:has("server") then do:
+                ablc:addSSHTargetDirectory(
+                    auxObject:getCharacter("folder"),
+                    auxObject:getCharacter("server"),
+                    auxObject:getCharacter("user"),
+                    auxObject:getCharacter("password")
+                ).    
+            end.
+            else do:
+                ablc:addTargetDirectory(
+                    auxObject:getCharacter("folder")
+                ).
+            end.
         end.
         
         if pCompilerSpecs:has("compilationErrors") then do:

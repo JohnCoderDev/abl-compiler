@@ -10,6 +10,8 @@ class classes.ablc.ABLCompiler:
     define private property filePathTester as PathTester get. set.
     define private property pathSeparator as character initial "\" get. set.
     define private property compilationErrorsFilePath as character get. set.
+    define private property hasSSHTarget as logical get. set.
+    define private property sshTempBuildDir as character get. set.
     define public property compilationErrors as JsonArray get. set.
     
     define private temp-table sourceDirectories
@@ -18,7 +20,11 @@ class classes.ablc.ABLCompiler:
     
     define private temp-table targetDirectories
         field directoryPath as character
-        index idxDirectoryPath as primary unique directoryPath.
+        field isSSH as logical
+        field sshServer as character
+        field sshUser as character
+        field sshPassword as character
+        index idxDirectoryPath as primary unique directoryPath isSSH.
         
     define private temp-table compiledFiles
         field pathSourceCode as character
@@ -38,7 +44,9 @@ class classes.ablc.ABLCompiler:
         assign 
             sourcePathTester = new PathTester()
             targetPathTester = new PathTester()
-            filePathTester = new PathTester().
+            filePathTester = new PathTester()
+            sshTempBuildDir = session:temp-directory + "ablctmpbuild".
+        
         if opsys <> "win32" then do:
             assign pathSeparator = "/".
         end.
@@ -68,11 +76,39 @@ class classes.ablc.ABLCompiler:
             OSCommand.runWhen = "after".
         return this-object.
     end method.
+   
+    method public ABLCompiler addSSHTargetDirectory(
+        pPath as character,
+        pServer as character,
+        pUser as character,
+        pPassword as character
+    ):
+        if session:temp-directory = "" then do:
+            return error new ABLCNullTempDirectory().
+        end.
+        assign hasSSHTarget = true.        
+        addTargetDirectory(sshTempBuildDir).
+        if not can-find(
+            first targetDirectories
+            where targetDirectories.directoryPath = pPath
+                and targetDirectories.isSSH = true
+        ) then do:
+            create targetDirectories.
+            assign
+                targetDirectories.directoryPath = pPath
+                targetDirectories.isSSH = true
+                targetDirectories.sshServer = pServer
+                targetDirectories.sshUser = pUser
+                targetDirectories.sshPassword = pPassword.
+        end.
+        return this-object.
+    end method.
     
     method public ABLCompiler addTargetDirectory(pPath as character):
         if not can-find(
             first targetDirectories
             where targetDirectories.directoryPath = pPath
+                and targetDirectories.isSSH = false
         ) then do:
             create targetDirectories.
             assign targetDirectories.directoryPath = pPath.
@@ -102,10 +138,12 @@ class classes.ablc.ABLCompiler:
     end method.
     
     method public void compile():
-        define variable hasToCompile as logical no-undo. 
+        define variable hasToCompile as logical no-undo.
+        resetSSHTempBuildDir().
         verifyCompilationNecessity().
         
         assign hasToCompile = temp-table filesToCompile:has-records.
+        
         if hasToCompile then do:
             assign compilationErrors = new JsonArray().
             runCommands("before").
@@ -155,6 +193,40 @@ class classes.ablc.ABLCompiler:
                 compilationErrors:writeFile(compilationErrorsFilePath, true).
             end.
         end.
+        copyToSSHTargets().
+        os-delete value(sshTempBuildDir) recursive.
+    end method.
+    
+    method private void resetSSHTempBuildDir():
+        if hasSSHTarget then do:
+            os-delete value(sshTempBuildDir) recursive.
+            os-create-dir value(sshTempBuildDir).
+        end. 
+    end method.
+    
+    method private void copyToSSHTargets():
+        if hasSSHTarget then do:
+            define variable sshCopyCommand as character no-undo.
+            define variable replacedCommand as character no-undo.
+            if opsys = "win32" then do:
+                sshCopyCommand = "pscp -pw &1 -r &2 &3@&4:&5".
+            end.
+            else do:
+                sshCopyCommand = "sshpass -p &1 ssh -r &2 &3@&4:&5".
+            end.
+            
+            for each targetDirectories where isSSH = true:
+                assign replacedCommand = substitute(
+                    sshCopyCommand,
+                    targetDirectories.sshPassword,
+                    sshTempBuildDir,
+                    targetDirectories.sshUser,
+                    targetDirectories.sshServer,
+                    targetDirectories.directoryPath
+                ).
+                os-command silent no-console no-wait value(replacedCommand).
+            end.
+        end.
     end method.
     
     method private void runCommands(pGrouper as character):
@@ -166,7 +238,7 @@ class classes.ablc.ABLCompiler:
     method private void verifyCompilationNecessity():
         empty temp-table filesToCompile.
         for each sourceDirectories:
-            for each targetDirectories:
+            for each targetDirectories where targetDirectories.isSSH = false:
                 verifyCompilationNecessity(
                     sourceDirectories.directoryPath,
                     targetDirectories.directoryPath
@@ -257,6 +329,7 @@ class classes.ablc.ABLCompiler:
         empty temp-table filesToCompile.
         assign 
             compilationErrors = new JsonArray()
+            hasSSHTarget = false
             compilationErrorsFilePath = "".
     end method.
 end class.
