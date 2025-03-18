@@ -1,0 +1,16 @@
+{
+	"sources": [
+		{
+			"folder": "\\\\10.10.1.4\\ti\\fontes\\projetos\\abl-compiler\\src\\classes"
+		}
+	],
+	"targets": [
+		{
+			"folder": "\\\\10.10.1.12\\totvs\\erp\\especificos"
+		}
+	],
+	"compilationErrors": "C:\\temp\\compiler-errors.json",
+	"service": {
+		"interval": 5 
+	}
+}
