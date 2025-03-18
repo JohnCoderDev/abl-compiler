@@ -31,6 +31,7 @@ if /I "%1" == "-h" goto HELP
 if /I "%1" == "-c" (
 	set compilerSpecs=%2
 	set compilationMode=c
+	
 	shift
 	shift
 )
@@ -66,6 +67,12 @@ goto GETOPTIONS
 if "%compilerScript%" == "" (
 	goto HELP
 )
+
+echo.%compilerSpecs% | findstr /C:":" 1>nul
+if errorlevel 1 (
+	set compilerSpecs=%cd%\%compilerSpecs%
+)
+
 %prowin% -p %compilerScript% -param %compilationMode%;%compilerSpecs%,%extraProcedures% %additionalArgs%
 
 goto PROGRAMEND
