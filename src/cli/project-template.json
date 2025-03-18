@@ -1,0 +1,17 @@
+{
+	"sources": [
+		{
+			"folder": "<path-to-folder>",
+			"mantainDirectoryStructure": true // optional
+		}
+	],
+	"targets": [
+		{
+			"folder": "<path-to-folder>"
+		}
+	},
+	"compilationErrors": "<path-to-json-output>",
+	"service": {
+		"interval": 5 // in seconds
+	}
+}
