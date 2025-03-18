@@ -33,14 +33,8 @@ class classes.ablc.ABLCompilerParser:
         
         do idx = 1 to auxArray:length:
             assign 
-                auxObject = auxArray:getJsonObject(idx)
-                mantainStructure = if auxObject:has("mantainStructure")
-                    then auxObject:getLogical("mantainStructure")
-                    else true.
-            ablc:addSourceDirectory(
-                auxObject:getCharacter("folder"),
-                mantainStructure
-            ).
+                auxObject = auxArray:getJsonObject(idx).
+            ablc:addSourceDirectory(auxObject:getCharacter("folder")).
         end.
         
         assign auxArray = pCompilerSpecs:getJsonArray("targets").

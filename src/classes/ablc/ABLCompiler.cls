@@ -14,7 +14,6 @@ class classes.ablc.ABLCompiler:
     
     define private temp-table sourceDirectories
         field directoryPath as character
-        field replicateDirectoryStructure as logical
         index idxDirectoryPath as primary unique directoryPath.
     
     define private temp-table targetDirectories
@@ -40,6 +39,9 @@ class classes.ablc.ABLCompiler:
             sourcePathTester = new PathTester()
             targetPathTester = new PathTester()
             filePathTester = new PathTester().
+        if opsys <> "win32" then do:
+            assign pathSeparator = "/".
+        end.
     end constructor.
     
     method public ABLCompiler setPathSeparator(pSeparator as character):
@@ -78,11 +80,8 @@ class classes.ablc.ABLCompiler:
         return this-object.
     end method.
     
-    method public ABLCompiler addSourceDirectory(pPath as character):
-        return addSourceDirectory(pPath, true).
-    end method.
     
-    method public ABLCompiler addSourceDirectory(pPath as character, pReplicateStructure as logical):
+    method public ABLCompiler addSourceDirectory(pPath as character):
          if not can-find(
             first sourceDirectories
             where targetDirectories.directoryPath = pPath
@@ -97,16 +96,17 @@ class classes.ablc.ABLCompiler:
             end.
             
             create sourceDirectories.
-            assign 
-                sourceDirectories.directoryPath = pPath
-                sourceDirectories.replicateDirectoryStructure = pReplicateStructure.
+            assign sourceDirectories.directoryPath = pPath.
         end.
         return this-object.
     end method.
     
     method public void compile():
+        define variable hasToCompile as logical no-undo. 
         verifyCompilationNecessity().
-        if temp-table filesToCompile:has-records then do:
+        
+        assign hasToCompile = temp-table filesToCompile:has-records.
+        if hasToCompile then do:
             assign compilationErrors = new JsonArray().
             runCommands("before").
         end.
@@ -149,7 +149,7 @@ class classes.ablc.ABLCompiler:
             end.
         end.
         
-        if temp-table filesToCompile:has-records then do:
+        if hasToCompile then do:
             runCommands("after").
             if compilationErrorsFilePath <> "" then do:
                 compilationErrors:writeFile(compilationErrorsFilePath, true).
@@ -169,8 +169,7 @@ class classes.ablc.ABLCompiler:
             for each targetDirectories:
                 verifyCompilationNecessity(
                     sourceDirectories.directoryPath,
-                    targetDirectories.directoryPath,
-                    sourceDirectories.replicateDirectoryStructure
+                    targetDirectories.directoryPath
                 ).
             end.
         end.
@@ -178,8 +177,7 @@ class classes.ablc.ABLCompiler:
     
     method private void verifyCompilationNecessity(
         pSourcePath as character, 
-        pTargetPath as character,
-        pMantainDirectoryStructure as logical
+        pTargetPath as character
     ):
         define variable nameOfPath as character no-undo.
         define variable fullSourcePath as character no-undo.
@@ -202,8 +200,7 @@ class classes.ablc.ABLCompiler:
                 if sourcePathTester:isDir() then do:
                     verifyCompilationNecessity(
                         sourcePathTester:getFullPath(),
-                        pTargetPath + (if pMantainDirectoryStructure then pathSeparator + nameOfPath else ""),
-                        pMantainDirectoryStructure
+                        pTargetPath
                     ).
                 end.
                 else if sourcePathTester:isFile() and (

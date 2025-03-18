@@ -22,7 +22,6 @@ class classes.ablc.rules.ABLCompileOnceRules:
         end.
         
         define variable folderPath as character no-undo.
-        define variable mantainStructure as logical no-undo.
         
         assign auxArray = pJson:getJsonArray("sources").
         if auxArray:length = 0 then do:
@@ -40,9 +39,6 @@ class classes.ablc.rules.ABLCompileOnceRules:
             end.
             
             assign folderPath = auxObject:getCharacter("folder").
-            if auxObject:has("mantainStructure") then do:
-                assign mantainStructure = auxObject:getLogical("mantainStructure").
-            end.
         end.
         
         assign auxArray = pJson:getJsonArray("targets").
