@@ -2,7 +2,7 @@
 	"sources": [
 		{
 			"folder": "<path-to-folder>",
-			"mantainDirectoryStructure": true // optional
+			"mantainStructure": true 
 		}
 	],
 	"targets": [
@@ -12,6 +12,14 @@
 	},
 	"compilationErrors": "<path-to-json-output>",
 	"service": {
-		"interval": 5 // in seconds
-	}
+		"interval": 5 
+	},
+	"beforeCommands": [
+		"command1",
+		"command2"
+	],
+	"afterCommands": [
+		"command1",
+		"command2"
+	]
 }

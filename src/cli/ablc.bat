@@ -1,6 +1,7 @@
 @echo off
 setlocal
 set prowin=%DLC%\bin\prowin.exe
+set compilerScript=%~dp0^compiler-cli.p
 
 goto GETOPTIONS
 
@@ -29,13 +30,13 @@ goto PROGRAMEND
 if /I "%1" == "-h" goto HELP
 if /I "%1" == "-c" (
 	set compilerSpecs=%2
-	set compilerScript=%~dp0^compile-once.p
+	set compilationMode=c
 	shift
 	shift
 )
 if /I "%1" == "-s" (
 	set compilerSpecs=%2
-	set compilerScript=%~dp0^compiler-service.p
+	set compilationMode=s
 	shift
 	shift
 )
@@ -65,7 +66,7 @@ goto GETOPTIONS
 if "%compilerScript%" == "" (
 	goto HELP
 )
-%prowin% -p %compilerScript% -param %compilerSpecs%,%extraProcedures% %additionalArgs%
+%prowin% -p %compilerScript% -param %compilationMode%;%compilerSpecs%,%extraProcedures% %additionalArgs%
 
 goto PROGRAMEND
 
