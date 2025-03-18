@@ -20,9 +20,19 @@ echo.
 echo ablc [-s ^<compiler-options.json^>] [...OPTIONS]
 echo 	starts the compilation service according with the specified json file
 echo.
+echo.
 echo OPTIONS
 echo 	-ininame 	= path to the .ini file
 echo 	-p		= extra procedures to run before the compilation/compilation service
+echo.
+echo.
+echo SETUP
+echo 	you might want to setup an environment variable ^%oeini^% to automatically pass an ini file to
+echo 	ablc.bat. You can to that with the following command as administrator:
+echo.
+echo 	```bat
+echo 		setx /M oeini "^<path-to-ini-file^>"
+echo 	```
 
 goto PROGRAMEND
 
@@ -31,7 +41,6 @@ if /I "%1" == "-h" goto HELP
 if /I "%1" == "-c" (
 	set compilerSpecs=%2
 	set compilationMode=c
-	
 	shift
 	shift
 )
@@ -71,6 +80,13 @@ if "%compilerScript%" == "" (
 echo.%compilerSpecs% | findstr /C:":" 1>nul
 if errorlevel 1 (
 	set compilerSpecs=%cd%\%compilerSpecs%
+)
+
+echo.%additionalArgs% | findstr /C:"-ininame " 1>nul
+if errorlevel 1 (
+	if not "%oeini%" == "" (
+		set additionalArgs=%additionalArgs% -basekey "ini" -ininame %oeini%	
+	)
 )
 
 %prowin% -p %compilerScript% -param %compilationMode%;%compilerSpecs%,%extraProcedures% %additionalArgs%

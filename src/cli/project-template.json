@@ -1,8 +1,7 @@
 {
 	"sources": [
 		{
-			"folder": "<path-to-folder>",
-			"mantainStructure": true 
+			"folder": "<path-to-folder>"
 		}
 	],
 	"targets": [
