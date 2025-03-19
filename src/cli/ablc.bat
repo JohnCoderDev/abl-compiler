@@ -12,10 +12,44 @@ goto PROGRAMEND
 
 :GETOPTIONS
 if /I "%1" == "-h" goto HELP
+if /I "%1" == "--help" goto HELP
 if /I "%1" == "-c" (
 	set compilerSpecs=%2
 	set compilationMode=c
 	shift
+	shift
+)
+if /I "%1" == "--compile" (
+	set compilerSpecs=%2
+	set compilationMode=c
+	shift
+	shift
+)
+if /I "%1" == "-dc" (
+	if "%oedbn%" == "" (
+		echo environment variable %%oedbn%% is not settled
+		goto PROGRAMEND
+	)
+	set compilerSpecs=%oedbn%
+	set compilationMode=c
+	shift
+)
+if /I "%1" == "-c1" (
+	if "%oebn1%" == "" (
+		echo environment variable %%oebn1%% is not settled
+		goto PROGRAMEND
+	)
+	set compilerSpecs=%oebn1%
+	set compilationMode=c
+	shift
+)
+if /I "%1" == "-c2" (
+	if "%oebn2%" == "" (
+		echo environment variable %%oebn2%% is not settled
+		goto PROGRAMEND
+	)
+	set compilerSpecs=%oebn2%
+	set compilationMode=c
 	shift
 )
 if /I "%1" == "-s" (
@@ -24,7 +58,44 @@ if /I "%1" == "-s" (
 	shift
 	shift
 )
+if /I "%1" == "--service" (
+	set compilerSpecs=%2
+	set compilationMode=s
+	shift
+	shift
+)
+if /I "%1" == "-ds" (
+	if "%oedbn%" == "" (
+		echo environment variable %%oedbn%% is not settled
+		goto PROGRAMEND
+	)
+	set compilerSpecs=%oedbn%
+	set compilationMode=s
+	shift
+)
+if /I "%1" == "-s1" (
+	if "%oebn1%" == "" (
+		echo environment variable %%oebn1%% is not settled
+		goto PROGRAMEND
+	)
+	set compilerSpecs=%oebn1%
+	set compilationMode=s
+	shift
+)
+if /I "%1" == "-s2" (
+	if "%oebn2%" == "" (
+		echo environment variable %%oebn2%% is not settled
+		goto PROGRAMEND
+	)
+	set compilerSpecs=%oebn2%
+	set compilationMode=s
+	shift
+)
 if /I "%1" == "-n" (
+	copy %~dp0^project-template.json %2
+	goto PROGRAMEND
+)
+if /I "%1" == "--new" (
 	copy %~dp0^project-template.json %2
 	goto PROGRAMEND
 )
@@ -60,7 +131,7 @@ if /I "%1" == "" (
 goto GETOPTIONS
 
 :RUNCOMPILATIONCMD
-if "%compilerScript%" == "" (
+if "%compilerSpecs%" == "" (
 	goto HELP
 )
 
