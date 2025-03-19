@@ -1,0 +1,10 @@
+
+USAGE
+	install [-h]
+		display this help in the screen
+
+	install [-i]
+		try to install ablc in your environment
+
+	install [-u]
+		try to update or install the ablc in your environment

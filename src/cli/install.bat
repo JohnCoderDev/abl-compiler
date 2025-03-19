@@ -10,17 +10,7 @@ if errorlevel 2 (
 goto GETOPTIONS
 
 :HELP
-echo USAGE:
-echo.
-echo install [-h]
-echo 	display this help in the screen
-echo.
-echo install [-i]
-echo 	try to install ablc in your environment
-echo.
-echo install [-u]
-echo 	try to update or install the ablc in your environment
-
+cat "%~dp0help-install.txt"
 goto PROGRAMEND
 
 :INSTALL
@@ -51,9 +41,10 @@ if /I "%1" == "-u" (
 	cd tmp
 	where /q ablc.bat
 
+	cd ..
+	rmdir tmp
+
 	if errorlevel 1 (
-		cd ..
-		rmdir tmp
 		goto INSTALL
 	) else (
 		copy * "%appdata%\ablc\" >nul 2>&1
