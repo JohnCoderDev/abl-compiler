@@ -1,10 +1,10 @@
 
 USAGE
-	install [-h]
+	install-ablc [-h]
 		display this help in the screen
 
-	install [-i]
+	install-ablc [-i]
 		try to install ablc in your environment
 
-	install [-u]
+	install-ablc [-u]
 		try to update or install the ablc in your environment
