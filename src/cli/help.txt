@@ -32,22 +32,22 @@ SETUP
 	ablc.bat. You can to that with the following command as administrator:
 
 	```
-	setx /M oeini "<path-to-ini-file>"
+		setx /M oeini "<path-to-ini-file>"
 	```
 
 	you also may want to setup a environment variable to automatically pass some defaults procedures
 	when executing the ablc.bat. In this case, you will setup %oedcs%:
 
 	```
-	setx /M oedcs "<path-to-scripts>"
+		setx /M oedcs "<path-to-scripts>"
 	```
 	
-	* IMPORTANT: if some procedure is not found by the program, it is ignored and the program
+	**IMPORTANT**: if some procedure is not found by the program, it is ignored and the program
 	continues its normal execution
 
 	you can define default `.pf` file as well:
 
 	```
-	setx /M oedpf "<path-to-pf-file>"
+		setx /M oedpf "<path-to-pf-file>"
 	```
 

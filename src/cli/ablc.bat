@@ -1,13 +1,23 @@
 @echo off
 setlocal
 set prowin=%DLC%\bin\prowin.exe
-set compilerScript=%~dp0^compiler-cli.p
+set ablcInstallDir=%appdata%\ablc
+set compilerScript=%ablcInstallDir%\compiler-cli.p
+
+if not exist %ablcInstallDir% (
+	echo ERROR: the ablc is not installed yet, please install with the install-ablc script
+	goto PROGRAMEND
+)
 
 goto GETOPTIONS
 
 :HELP
 
-cat "%~dp0help.txt"
+if exist "%ablcInstallDir%\help.txt" (
+	cat "%ablcInstallDir%\help.txt"
+) else (
+	cat "%~dp0help.txt"
+)
 goto PROGRAMEND
 
 :GETOPTIONS
@@ -131,6 +141,10 @@ if /I "%1" == "" (
 goto GETOPTIONS
 
 :RUNCOMPILATIONCMD
+if not exist %compilerScript% (
+	echo ERROR: compiler script was not found in the path %compilerScript%
+	goto PROGRAMEND
+)
 if "%compilerSpecs%" == "" (
 	goto HELP
 )
