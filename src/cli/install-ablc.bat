@@ -1,5 +1,6 @@
 @echo off
 setlocal
+set ablcInstallDir=%appdata%\ablc
 
 net session >nul 2>&1
 if errorlevel 2 (
@@ -14,16 +15,19 @@ cat "%~dp0help-install.txt"
 goto PROGRAMEND
 
 :INSTALL
-mkdir %~dp0^tmp
-cd tmp
+mkdir "%~dp0tmp" >nul 2>&1
+cd tmp >nul 2>&1
 where /q ablc.bat
 
 if errorlevel 1 (
 	mkdir %appdata%\ablc >nul 2>&1
-	setx /M path "%appdata%\ablc\;%path%" >nul 2>&1
+	echo. "%path%" | findstr /C:"%ablcInstallDir%\;" >nul
+	if errorlevel 1 (
+		setx /M path "%ablcInstallDir%\;%path%" >nul 2>&1
+	)
 	cd ..
-	rmdir tmp
-	copy * "%appdata%\ablc\" >nul 2>&1
+	rmdir tmp >nul 2>&1
+	copy * "%ablcInstallDir%\" >nul 2>&1
 	echo installed with success.
 	goto PROGRAMEND
 ) 
@@ -37,16 +41,16 @@ goto PROGRAMEND
 :GETOPTIONS
 
 if /I "%1" == "-u" (
-	mkdir %~dp0^tmp
-	cd tmp
+	mkdir %~dp0^tmp >nul 2>&1
+	cd tmp >nul 2>&1
 	where /q ablc.bat
 
 	if errorlevel 1 (
 		goto INSTALL
 	) else (
 		cd ..
-		rmdir tmp
-		copy * "%appdata%\ablc\" >nul 2>&1
+		rmdir tmp >nul 2>&1
+		copy * "%ablcInstallDir%\" >nul 2>&1
 		echo updated with success.
 	)
 	goto PROGRAMEND
