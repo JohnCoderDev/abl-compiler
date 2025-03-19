@@ -19,7 +19,7 @@ compilerObject
 	:compile().
 ```
 
-## Using the `ABLCompilerService`
+## Using the `ABLCompilerService` class
 
 In simple words, it runs periodically the `compile` method
 with an specified compiler. In other words, use as example
@@ -35,3 +35,14 @@ compilerService
 	:setInterval(5) // calls compilerObject:compile() every 5 seconds
 	:startService().
 ```
+
+## Using the CLI 
+
+You can install the cli in your computer running the script [install-ablc](./src/cli/install-ablc.bat).
+After that, in the cmd or powershell the command `ablc` must be available in your computer.
+Check that typing the following command to display the help:
+
+```console
+> ablc -h
+```
+
