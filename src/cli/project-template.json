@@ -7,6 +7,12 @@
 	"targets": [
 		{
 			"folder": "<path-to-folder>"
+		},
+		{
+			"folder": "<path-to-folder>",
+			"server": "0.0.0.0",
+			"user": "<username>",
+			"password": "<password>"
 		}
 	},
 	"compilationErrors": "<path-to-json-output>",
