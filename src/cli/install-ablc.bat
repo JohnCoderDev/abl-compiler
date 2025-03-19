@@ -41,12 +41,11 @@ if /I "%1" == "-u" (
 	cd tmp
 	where /q ablc.bat
 
-	cd ..
-	rmdir tmp
-
 	if errorlevel 1 (
 		goto INSTALL
 	) else (
+		cd ..
+		rmdir tmp
 		copy * "%appdata%\ablc\" >nul 2>&1
 		echo updated with success.
 	)
