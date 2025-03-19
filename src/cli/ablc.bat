@@ -6,34 +6,8 @@ set compilerScript=%~dp0^compiler-cli.p
 goto GETOPTIONS
 
 :HELP
-echo USAGE:
-echo.
-echo ablc [-h]
-echo 	displays this help
-echo.
-echo ablc [-n ^<name-of-file.json^>]
-echo 	copy the project template to the specified path
-echo.
-echo ablc [-c ^<compiler-options.json^>] [...OPTIONS]
-echo 	compile once according to the specification in the json file
-echo.
-echo ablc [-s ^<compiler-options.json^>] [...OPTIONS]
-echo 	starts the compilation service according with the specified json file
-echo.
-echo.
-echo OPTIONS
-echo 	-ininame 	= path to the .ini file
-echo 	-p		= extra procedures to run before the compilation/compilation service
-echo.
-echo.
-echo SETUP
-echo 	you might want to setup an environment variable ^%oeini^% to automatically pass an ini file to
-echo 	ablc.bat. You can to that with the following command as administrator:
-echo.
-echo 	```bat
-echo 		setx /M oeini "^<path-to-ini-file^>"
-echo 	```
 
+cat "%~dp0help.txt"
 goto PROGRAMEND
 
 :GETOPTIONS
@@ -64,6 +38,19 @@ if /I "%1" == "-p" (
 	shift
 	shift
 )
+if /I "%1" == "-pf" (
+	set additionalArgs=%additionalArgs% -pf %2
+	shift
+	shift
+)
+if /I "%1" == "-pf1" (
+	set additionalArgs=%additionalArgs% -pf %oepf1%
+	shift
+)
+if /I "%1" == "-pf2" (
+	set additionalArgs=%additionalArgs% -pf %oepf2%
+	shift
+)
 
 shift
 if /I "%1" == "" (
@@ -87,6 +74,17 @@ if errorlevel 1 (
 	if not "%oeini%" == "" (
 		set additionalArgs=%additionalArgs% -basekey "ini" -ininame %oeini%	
 	)
+)
+
+echo.%additionalArgs% | findstr /C:"-pf " 1>nul
+if errorlevel 1 (
+	if not "%oedpf%" == "" (
+		set additionalArgs=%additionalArgs% -pf %oedpf%	
+	)
+)
+
+if "%extraProcedures%" == "" (
+	set extraProcedures=%oedcs%
 )
 
 %prowin% -p %compilerScript% -param %compilationMode%;%compilerSpecs%,%extraProcedures% %additionalArgs%

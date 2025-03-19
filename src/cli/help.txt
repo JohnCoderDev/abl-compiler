@@ -1,0 +1,47 @@
+
+USAGE
+	ablc [-h]
+		displays this help
+
+	ablc [-n <name-of-file.json>]
+		copy the project template to the specified path
+
+	ablc [-c <compiler-options.json>] [...OPTIONS]
+		compile once according to the specification in the json file
+
+	ablc [-s <compiler-options.json>] [...OPTIONS]
+		starts the compilation service according with the specified json file
+
+
+OPTIONS
+	-ininame	path to the .ini file
+	-p		extra procedures to run before the compilation/compilation service
+	-pf 		full path to the parameter file
+	-pf1 		try to use the value of %oepf1% environment variable as argument to -pf
+	-pf2 		try to use the value of %oepf2% environment variable as argument to -pf
+
+
+SETUP
+	you might want to setup an environment variable %oeini% to automatically pass an ini file to
+	ablc.bat. You can to that with the following command as administrator:
+
+	```
+		setx /M oeini "<path-to-ini-file>"
+	```
+
+	you also may want to setup a environment variable to automatically pass some defaults procedures
+	when executing the ablc.bat. In this case, you will setup %oedcs%:
+
+	```
+		setx /M oedcs "<path-to-scripts>"
+	```
+	
+	* IMPORTANT: if some procedure is not found by the program, it is ignored and the program
+	continues its normal execution
+
+	you can define default `.pf` file as well:
+
+	```
+		setx /M oedpf "<path-to-pf-file>"
+	```
+
