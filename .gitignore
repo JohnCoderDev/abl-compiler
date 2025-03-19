@@ -1,2 +1,4 @@
 build/
 tests/
+build-prod.json
+build.json
