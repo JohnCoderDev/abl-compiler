@@ -22,7 +22,14 @@ class classes.ablc.ABLCompilerService:
             return error new ABLCInvalidInterval().
         end.
         repeat:
+            ABLCompilerMessageFormatter:writeMessage(
+                "calling `compile` method"
+            ).
             compilerObject:compile().
+            
+            ABLCompilerMessageFormatter:writeMessage(
+                "pausing for " + string(timeInterval) + " seconds"
+            ).
             pause timeInterval.
         end.
     end method.

@@ -45,7 +45,11 @@ class classes.ablc.ABLCompiler:
             sourcePathTester = new PathTester()
             targetPathTester = new PathTester()
             filePathTester = new PathTester()
-            sshTempBuildDir = session:temp-directory + "ablctmpbuild".
+            sshTempBuildDir = session:temp-directory + "ablc-tmpbuild".
+        
+        ABLCompilerMessageFormatter:writeMessage(
+            "ssh temp directory settled to `" + sshTempBuildDir + "`"
+        ).    
         
         if opsys <> "win32" then do:
             assign pathSeparator = "/".
@@ -53,7 +57,7 @@ class classes.ablc.ABLCompiler:
     end constructor.
     
     method public ABLCompiler setPathSeparator(pSeparator as character):
-        assign pathSeparator = pSeparator.
+        assign pathSeparator = pSeparator. 
         return this-object.
     end.
     
@@ -92,7 +96,7 @@ class classes.ablc.ABLCompiler:
             first targetDirectories
             where targetDirectories.directoryPath = pPath
                 and targetDirectories.isSSH = true
-        ) then do:
+        ) then do:    
             create targetDirectories.
             assign
                 targetDirectories.directoryPath = pPath
@@ -100,6 +104,11 @@ class classes.ablc.ABLCompiler:
                 targetDirectories.sshServer = pServer
                 targetDirectories.sshUser = pUser
                 targetDirectories.sshPassword = pPassword.
+                
+             ABLCompilerMessageFormatter:writeMessage(
+                "added ssh target directory `" + targetDirectories.directoryPath + "`"
+                + " in the server `" + targetDirectories.sshServer + "`"
+             ).
         end.
         return this-object.
     end method.
@@ -112,6 +121,10 @@ class classes.ablc.ABLCompiler:
         ) then do:
             create targetDirectories.
             assign targetDirectories.directoryPath = pPath.
+            
+            ABLCompilerMessageFormatter:writeMessage(
+                "added target directory `" + targetDirectories.directoryPath + "`"
+            ).
         end.
         return this-object.
     end method.
@@ -128,11 +141,18 @@ class classes.ablc.ABLCompiler:
             end.
             
             if not propath matches "*" + pPath + "*" then do:
+                ABLCompilerMessageFormatter:writeMessage(
+                    "adding `" + pPath + "` to the propath"
+                ).    
                 assign propath = pPath + "," + propath.
             end.
-            
+                
             create sourceDirectories.
             assign sourceDirectories.directoryPath = pPath.
+            
+            ABLCompilerMessageFormatter:writeMessage(
+                "added source directory `" + sourceDirectories.directoryPath + "`"
+            ).
         end.
         return this-object.
     end method.
@@ -155,12 +175,27 @@ class classes.ablc.ABLCompiler:
                 no-error.
             
             if not compiler:error then do:
+                ABLCompilerMessageFormatter:writeMessage(
+                    "compiled file from source `" + filesToCompile.pathSourceCode + "`"
+                    + " to folder target `" + filesToCompile.folderTarget + "`",
+                    "success"
+                ).
                 delete filesToCompile.
             end.
             else do:
                 define variable idx as integer no-undo.
                 define variable compilerMessage as JsonObject no-undo.
                 do idx = 1 to compiler:num-messages:
+                    ABLCompilerMessageFormatter:writeMessage(
+                        compiler:get-file-name(idx)
+                        + ":" + string(compiler:get-row(idx))
+                        + ":" + string(compiler:get-column(idx))
+                        + ": " + compiler:get-message(idx)
+                        + " (" + string(compiler:get-number(idx)) + ")",
+                        if compiler:get-message-type(idx) = 1 then "error"
+                        else if compiler:get-message-type(idx) = 2 then "warning"
+                        else "preprocessor"
+                    ).
                     assign compilerMessage = new JsonObject().
                     compilerMessage:add("timestamp", now).
                     compilerMessage:add("row", compiler:get-row(idx)).
@@ -178,7 +213,7 @@ class classes.ablc.ABLCompiler:
                         compiler:get-file-name(idx)
                         + ":" + string(compiler:get-row(idx))
                         + ":" + string(compiler:get-column(idx))
-                        + ":" + compiler:get-message(idx)
+                        + ": " + compiler:get-message(idx)
                         + " (" + string(compiler:get-number(idx)) + ")"
                         + " [" + compilerMessage:getCharacter("typeName") + "]"
                     ).    
@@ -199,7 +234,13 @@ class classes.ablc.ABLCompiler:
     
     method private void resetSSHTempBuildDir():
         if hasSSHTarget then do:
+            ABLCompilerMessageFormatter:writeMessage(
+                "deleting the folder `" + sshTempBuildDir + "`"
+            ).    
             os-delete value(sshTempBuildDir) recursive.
+            ABLCompilerMessageFormatter:writeMessage(
+                "creating the folder `" + sshTempBuildDir + "`"
+            ).
             os-create-dir value(sshTempBuildDir).
         end. 
     end method.
@@ -224,14 +265,27 @@ class classes.ablc.ABLCompiler:
                     targetDirectories.sshServer,
                     targetDirectories.directoryPath
                 ).
+                ABLCompilerMessageFormatter:writeMessage(
+                    "running the copy command `" + replacedCommand + "`" 
+                ).
                 os-command silent no-console no-wait value(replacedCommand).
+                if os-error <> 0 then do:
+                    ABLCompilerMessageFormatter:writeMessage(
+                        "os-error " + string(os-error),
+                        "error"
+                    ).
+                end.
             end.
         end.
     end method.
     
     method private void runCommands(pGrouper as character):
         for each OSCommand where OSCommand.runWhen = pGrouper:
-            os-command(OSCommand.commandString).
+            ABLCompilerMessageFormatter:writeMessage(
+                "running command `" + OSCommand.commandString + "`"
+                + " of the grouper `" + pGrouper + "`"
+            ).
+            os-command silent no-console no-wait value(OSCommand.commandString).
         end.
     end method.
     
@@ -257,6 +311,9 @@ class classes.ablc.ABLCompiler:
         
         targetPathTester:setPath(pTargetPath).
         if not targetPathTester:pathExists() then do:
+            ABLCompilerMessageFormatter:writeMessage(
+                "creating directory `" + pTargetPath + "`"
+            ).
             os-create-dir value(pTargetPath).
         end.
         
@@ -296,12 +353,22 @@ class classes.ablc.ABLCompiler:
                             compiledFiles.pathSourceCode = fullSourcePath
                             compiledFiles.folderTarget = pTargetPath
                             compiledFiles.lastWriteTime = sourcePathTester:getLastWriteDateTime().
+                        
+                        ABLCompilerMessageFormatter:writeMessage(
+                            "source code `" + filesToCompile.pathSourceCode + "`" 
+                            + " requires compilation to target `" + filesToCompile.folderTarget + "`"
+                        ).    
                     end.
                     else if compiledFiles.lastWriteTime <> sourcePathTester:getLastWriteDateTime() then do:
                         create filesToCompile.
                         assign 
                             filesToCompile.pathSourceCode = fullSourcePath
                             filesToCompile.folderTarget = pTargetPath.
+                        
+                        ABLCompilerMessageFormatter:writeMessage(
+                            "source code `" + filesToCompile.pathSourceCode + "`" 
+                            + " requires recompilation to target `" + filesToCompile.folderTarget + "`"
+                        ).
                     end.
                     else do:
                         assign 
@@ -315,6 +382,11 @@ class classes.ablc.ABLCompiler:
                             assign 
                                 filesToCompile.pathSourceCode = fullSourcePath
                                 filesToCompile.folderTarget = pTargetPath.
+                                
+                            ABLCompilerMessageFormatter:writeMessage(
+                                "source code `" + filesToCompile.pathSourceCode + "`" 
+                                + " requires compilation to target `" + filesToCompile.folderTarget + "`"
+                            ).
                         end.
                     end.
                 end.
