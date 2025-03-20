@@ -4,6 +4,7 @@ set programCaller=%DLC%\bin\prowin.exe
 set ablcInstallDir=%appdata%\ablc
 set compilerScript=%ablcInstallDir%\compiler-cli.p
 set compilerLogOutput=ablc-compiler-log.log
+set quiet=0
 
 if not exist %ablcInstallDir% (
 	echo ERROR: the ablc is not installed yet, please install with the install-ablc script
@@ -23,6 +24,10 @@ goto PROGRAMEND
 
 :GETOPTIONS
 if /I "%1" == "-h" goto HELP
+if /I "%1" == "-q" (
+	set quiet=1
+	shift
+)
 if /I "%1" == "--help" goto HELP
 if /I "%1" == "-c" (
 	set compilerSpecs=%2
@@ -179,9 +184,7 @@ if "%extraProcedures%" == "" (
 )
 
 %programCaller% -b -p %compilerScript% -param %compilationMode%;%compilerSpecs%;%compilerLogOutput%,%extraProcedures% %additionalArgs%
-if not exist %compilerLogOutput% (
-	echo it was not possible to find %compilerLogOutput%
-) else ( 
+if exist %compilerLogOutput% if not quiet == 0 (
 	cat %compilerLogOutput%
 )
 goto PROGRAMEND

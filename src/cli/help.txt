@@ -25,6 +25,8 @@ OPTIONS
 	-c2 		use the value of %oebn2% as argument to -c parameter
 	-s1 		use the value of %oebn1% as argument to -s parameter
 	-s2 		use the value of %oebn2% as argument to -s parameter
+	-log 		specify the log file name of the compilation (default `ablc-compiler-log.log`)
+	-q		if the parameter is present, it does not show the log in the screen after finishing the process
 
 
 SETUP
