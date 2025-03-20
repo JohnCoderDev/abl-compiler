@@ -14,7 +14,7 @@
 			"user": "<username>",
 			"password": "<password>"
 		}
-	},
+	],
 	"compilationErrors": "<path-to-json-output>",
 	"service": {
 		"interval": 5 
