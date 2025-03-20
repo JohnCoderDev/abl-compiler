@@ -36,11 +36,11 @@ compilerService
 	:startService().
 ```
 
-## Using the CLI 
+## Using the CLI (Windows)
 
 You can install the cli in your computer running the script [install-ablc](./src/cli/install-ablc.bat).
 After that, in the cmd or powershell the command `ablc` must be available in your computer.
-Check that typing the following command to display the help:
+Check that typing the following command to display the `ablc` help:
 
 ```console
 > ablc -h
