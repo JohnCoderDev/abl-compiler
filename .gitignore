@@ -2,3 +2,4 @@ build/
 tests/
 build-prod.json
 build.json
+ablc-compiler-log.log

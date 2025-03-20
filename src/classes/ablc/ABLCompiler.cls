@@ -226,10 +226,22 @@ class classes.ablc.ABLCompiler:
             runCommands("after").
             if compilationErrorsFilePath <> "" then do:
                 compilationErrors:writeFile(compilationErrorsFilePath, true).
+                ABLCompilerMessageFormatter:writeMessage(
+                    "written the compilation errors file `"
+                    + compilationErrorsFilePath + "`"
+                ).
             end.
         end.
         copyToSSHTargets().
+        
+        ABLCompilerMessageFormatter:writeMessage(
+            "trying to remove folder `" + sshTempBuildDir + "`"
+        ).
         os-delete value(sshTempBuildDir) recursive.
+        
+        ABLCompilerMessageFormatter:writeMessage(
+            "end of the compilation"
+        ).    
     end method.
     
     method private void resetSSHTempBuildDir():
@@ -250,10 +262,10 @@ class classes.ablc.ABLCompiler:
             define variable sshCopyCommand as character no-undo.
             define variable replacedCommand as character no-undo.
             if opsys = "win32" then do:
-                sshCopyCommand = "pscp -pw &1 -r &2 &3@&4:&5".
+                sshCopyCommand = "pscp -pw &1 -r &2\* &3@&4:&5".
             end.
             else do:
-                sshCopyCommand = "sshpass -p &1 ssh -r &2 &3@&4:&5".
+                sshCopyCommand = "sshpass -p &1 ssh -r &2/* &3@&4:&5".
             end.
             
             for each targetDirectories where isSSH = true:
@@ -268,12 +280,12 @@ class classes.ablc.ABLCompiler:
                 ABLCompilerMessageFormatter:writeMessage(
                     "running the copy command `" + replacedCommand + "`" 
                 ).
-                os-command silent no-console no-wait value(replacedCommand).
-                if os-error <> 0 then do:
-                    ABLCompilerMessageFormatter:writeMessage(
-                        "os-error " + string(os-error),
-                        "error"
-                    ).
+                
+                if opsys = "win32" then do:
+                    dos silent value(replacedCommand).
+                end.
+                else do:
+                    unix silent value(replacedCommand).
                 end.
             end.
         end.
@@ -285,7 +297,12 @@ class classes.ablc.ABLCompiler:
                 "running command `" + OSCommand.commandString + "`"
                 + " of the grouper `" + pGrouper + "`"
             ).
-            os-command silent no-console no-wait value(OSCommand.commandString).
+            if opsys = "win32" then do:
+                dos silent value(OSCommand.commandString).
+            end.
+            else do:
+                unix silent value(OSCommand.commandString).
+            end.    
         end.
     end method.
     
