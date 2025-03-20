@@ -23,25 +23,24 @@ if exist "%ablcInstallDir%\help.txt" (
 goto PROGRAMEND
 
 :GETOPTIONS
-if /I "%1" == "-h" goto HELP
-if /I "%1" == "-q" (
+if /I "%1" == "-h" (
+	goto HELP
+) else if /I "%1" == "--help" (
+	goto HELP
+) else if /I "%1" == "-q" (
 	set quiet=1
 	shift
-)
-if /I "%1" == "--help" goto HELP
-if /I "%1" == "-c" (
+) else  if /I "%1" == "-c" (
 	set compilerSpecs=%2
 	set compilationMode=c
 	shift
 	shift
-)
-if /I "%1" == "--compile" (
+) else if /I "%1" == "--compile" (
 	set compilerSpecs=%2
 	set compilationMode=c
 	shift
 	shift
-)
-if /I "%1" == "-dc" (
+) else if /I "%1" == "-dc" (
 	if "%oedbn%" == "" (
 		echo environment variable %%oedbn%% is not settled
 		goto PROGRAMEND
@@ -49,8 +48,7 @@ if /I "%1" == "-dc" (
 	set compilerSpecs=%oedbn%
 	set compilationMode=c
 	shift
-)
-if /I "%1" == "-c1" (
+) else if /I "%1" == "-c1" (
 	if "%oebn1%" == "" (
 		echo environment variable %%oebn1%% is not settled
 		goto PROGRAMEND
@@ -58,8 +56,7 @@ if /I "%1" == "-c1" (
 	set compilerSpecs=%oebn1%
 	set compilationMode=c
 	shift
-)
-if /I "%1" == "-c2" (
+) else if /I "%1" == "-c2" (
 	if "%oebn2%" == "" (
 		echo environment variable %%oebn2%% is not settled
 		goto PROGRAMEND
@@ -67,20 +64,17 @@ if /I "%1" == "-c2" (
 	set compilerSpecs=%oebn2%
 	set compilationMode=c
 	shift
-)
-if /I "%1" == "-s" (
+) else if /I "%1" == "-s" (
 	set compilerSpecs=%2
 	set compilationMode=s
 	shift
 	shift
-)
-if /I "%1" == "--service" (
+) else if /I "%1" == "--service" (
 	set compilerSpecs=%2
 	set compilationMode=s
 	shift
 	shift
-)
-if /I "%1" == "-ds" (
+) else if /I "%1" == "-ds" (
 	if "%oedbn%" == "" (
 		echo environment variable %%oedbn%% is not settled
 		goto PROGRAMEND
@@ -88,8 +82,7 @@ if /I "%1" == "-ds" (
 	set compilerSpecs=%oedbn%
 	set compilationMode=s
 	shift
-)
-if /I "%1" == "-s1" (
+) else if /I "%1" == "-s1" (
 	if "%oebn1%" == "" (
 		echo environment variable %%oebn1%% is not settled
 		goto PROGRAMEND
@@ -97,8 +90,7 @@ if /I "%1" == "-s1" (
 	set compilerSpecs=%oebn1%
 	set compilationMode=s
 	shift
-)
-if /I "%1" == "-s2" (
+) else if /I "%1" == "-s2" (
 	if "%oebn2%" == "" (
 		echo environment variable %%oebn2%% is not settled
 		goto PROGRAMEND
@@ -106,45 +98,39 @@ if /I "%1" == "-s2" (
 	set compilerSpecs=%oebn2%
 	set compilationMode=s
 	shift
-)
-if /I "%1" == "-n" (
+) else if /I "%1" == "-n" (
 	copy %~dp0^project-template.json %2
 	goto PROGRAMEND
-)
-if /I "%1" == "--new" (
+) else if /I "%1" == "--new" (
 	copy %~dp0^project-template.json %2
 	goto PROGRAMEND
-)
-if /I "%1" == "-ininame" (
+) else if /I "%1" == "-ininame" (
 	set additionalArgs=%additionalArgs% -basekey "ini" -ininame %2
 	shift
 	shift
-)
-if /I "%1" == "-p" (
+) else if /I "%1" == "-p" (
 	set extraProcedures=%2
 	shift
 	shift
-)
-if /I "%1" == "-pf" (
+) else if /I "%1" == "-pf" (
 	set additionalArgs=%additionalArgs% -pf %2
 	shift
 	shift
-)
-if /I "%1" == "-pf1" (
+) else if /I "%1" == "-pf1" (
 	set additionalArgs=%additionalArgs% -pf %oepf1%
 	shift
-)
-if /I "%1" == "-pf2" (
+) else if /I "%1" == "-pf2" (
 	set additionalArgs=%additionalArgs% -pf %oepf2%
 	shift
-)
-if /I "%1" == "-log" (
+) else if /I "%1" == "-log" (
 	set compilerLogOutput=%2
 	shift
 	shift
+) else (
+	echo ERROR: unknown parameter `%1`, type `ablc -h` to check the help
+	goto PROGRAMEND
 )
 
-shift
 if /I "%1" == "" (
 	goto RUNCOMPILATIONCMD
 )
@@ -184,7 +170,7 @@ if "%extraProcedures%" == "" (
 )
 
 %programCaller% -b -p %compilerScript% -param %compilationMode%;%compilerSpecs%;%compilerLogOutput%,%extraProcedures% %additionalArgs%
-if exist %compilerLogOutput% if not quiet == 0 (
+if %quiet% == 0 if exist %compilerLogOutput% (
 	cat %compilerLogOutput%
 )
 goto PROGRAMEND
