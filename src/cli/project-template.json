@@ -19,6 +19,10 @@
 	"service": {
 		"interval": 5 
 	},
+	"propath": [
+		"<path1>",
+		"<path2>"
+	],
 	"beforeCommands": [
 		"command1",
 		"command2"

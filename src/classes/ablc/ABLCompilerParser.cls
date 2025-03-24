@@ -81,6 +81,13 @@ class classes.ablc.ABLCompilerParser:
             end.
         end.
         
+        if pCompilerSpecs:has("propath") then do:
+            assign auxArray = pCompilerSpecs:getJsonArray("propath").
+            
+            do idx = auxArray:length to 1 by -1:
+                ablc:addToPropath(auxArray:getCharacter(idx)).
+            end.
+        end.
         return ablc.
     end method.
 end class.

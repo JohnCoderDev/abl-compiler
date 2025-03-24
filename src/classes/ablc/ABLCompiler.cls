@@ -56,6 +56,14 @@ class classes.ablc.ABLCompiler:
         end.
     end constructor.
     
+    method public ABLCompiler addToPropath(pPath as character):
+        if not propath matches "*" + pPath + ",*" then do:
+            assign propath = pPath + "," + propath.
+            ABLCompilerMessageFormatter:writeMessage("added `" + pPath + "` to the propath").
+        end.
+        return this-object.
+    end method.
+    
     method public ABLCompiler setPathSeparator(pSeparator as character):
         assign pathSeparator = pSeparator. 
         return this-object.

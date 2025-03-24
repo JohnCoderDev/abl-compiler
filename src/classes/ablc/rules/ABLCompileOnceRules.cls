@@ -86,5 +86,12 @@ class classes.ablc.rules.ABLCompileOnceRules:
                 assign auxChar = auxArray:getCharacter(idx).
             end.
         end.
+        
+        if pJson:has("propath") then do:
+            assign auxArray = pJson:getJsonArray("propath").
+            do idx = 1 to auxArray:length:
+                assign auxChar = auxArray:getCharacter(idx).
+            end.
+        end.
     end method.
 end class.
