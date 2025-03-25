@@ -354,7 +354,7 @@ class classes.ablc.ABLCompiler:
                 if sourcePathTester:isDir() then do:
                     verifyCompilationNecessity(
                         sourcePathTester:getFullPath(),
-                        pTargetPath
+                        pTargetPath + pathSeparator + nameOfPath
                     ).
                 end.
                 else if sourcePathTester:isFile() and (
