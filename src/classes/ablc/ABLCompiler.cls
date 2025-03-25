@@ -320,6 +320,7 @@ class classes.ablc.ABLCompiler:
             for each targetDirectories where targetDirectories.isSSH = false:
                 verifyCompilationNecessity(
                     sourceDirectories.directoryPath,
+                    targetDirectories.directoryPath,
                     targetDirectories.directoryPath
                 ).
             end.
@@ -328,7 +329,8 @@ class classes.ablc.ABLCompiler:
     
     method private void verifyCompilationNecessity(
         pSourcePath as character, 
-        pTargetPath as character
+        pTargetPath as character,
+        pBasePath as character
     ):
         define variable nameOfPath as character no-undo.
         define variable fullSourcePath as character no-undo.
@@ -354,7 +356,8 @@ class classes.ablc.ABLCompiler:
                 if sourcePathTester:isDir() then do:
                     verifyCompilationNecessity(
                         sourcePathTester:getFullPath(),
-                        pTargetPath + pathSeparator + nameOfPath
+                        pTargetPath + pathSeparator + nameOfPath,
+                        pBasePath
                     ).
                 end.
                 else if sourcePathTester:isFile() and (
@@ -371,12 +374,12 @@ class classes.ablc.ABLCompiler:
                         create filesToCompile.
                         assign 
                             filesToCompile.pathSourceCode = fullSourcePath
-                            filesToCompile.folderTarget = pTargetPath.
+                            filesToCompile.folderTarget = if nameOfPath matches "*.cls" then pBasePath else pTargetPath.
                         
                         create compiledFiles.
                         assign 
                             compiledFiles.pathSourceCode = fullSourcePath
-                            compiledFiles.folderTarget = pTargetPath
+                            compiledFiles.folderTarget = if nameOfPath matches "*.cls" then pBasePath else pTargetPath
                             compiledFiles.lastWriteTime = sourcePathTester:getLastWriteDateTime().
                         
                         ABLCompilerMessageFormatter:writeMessage(
@@ -388,7 +391,7 @@ class classes.ablc.ABLCompiler:
                         create filesToCompile.
                         assign 
                             filesToCompile.pathSourceCode = fullSourcePath
-                            filesToCompile.folderTarget = pTargetPath.
+                            filesToCompile.folderTarget = if nameOfPath matches "*.cls" then pBasePath else pTargetPath.
                         
                         ABLCompilerMessageFormatter:writeMessage(
                             "source code `" + filesToCompile.pathSourceCode + "`" 
@@ -406,7 +409,7 @@ class classes.ablc.ABLCompiler:
                             create filesToCompile.
                             assign 
                                 filesToCompile.pathSourceCode = fullSourcePath
-                                filesToCompile.folderTarget = pTargetPath.
+                                filesToCompile.folderTarget = if nameOfPath matches "*.cls" then pBasePath else pTargetPath.
                                 
                             ABLCompilerMessageFormatter:writeMessage(
                                 "source code `" + filesToCompile.pathSourceCode + "`" 
