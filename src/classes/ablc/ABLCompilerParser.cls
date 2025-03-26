@@ -44,8 +44,9 @@ class classes.ablc.ABLCompilerParser:
                 ablc:addSSHTargetDirectory(
                     auxObject:getCharacter("folder"),
                     auxObject:getCharacter("server"),
-                    auxObject:getCharacter("user"),
-                    auxObject:getCharacter("password")
+                    if auxObject:has("user") 
+                        then auxObject:getCharacter("user") 
+                        else "root"
                 ).    
             end.
             else do:

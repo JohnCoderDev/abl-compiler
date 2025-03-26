@@ -23,7 +23,6 @@ class classes.ablc.ABLCompiler:
         field isSSH as logical
         field sshServer as character
         field sshUser as character
-        field sshPassword as character
         index idxDirectoryPath as primary unique directoryPath isSSH.
         
     define private temp-table compiledFiles
@@ -92,8 +91,7 @@ class classes.ablc.ABLCompiler:
     method public ABLCompiler addSSHTargetDirectory(
         pPath as character,
         pServer as character,
-        pUser as character,
-        pPassword as character
+        pUser as character
     ):
         if session:temp-directory = "" then do:
             return error new ABLCNullTempDirectory().
@@ -110,8 +108,7 @@ class classes.ablc.ABLCompiler:
                 targetDirectories.directoryPath = pPath
                 targetDirectories.isSSH = true
                 targetDirectories.sshServer = pServer
-                targetDirectories.sshUser = pUser
-                targetDirectories.sshPassword = pPassword.
+                targetDirectories.sshUser = pUser.
                 
              ABLCompilerMessageFormatter:writeMessage(
                 "added ssh target directory `" + targetDirectories.directoryPath + "`"
@@ -269,17 +266,12 @@ class classes.ablc.ABLCompiler:
         if hasSSHTarget then do:
             define variable sshCopyCommand as character no-undo.
             define variable replacedCommand as character no-undo.
-            if opsys = "win32" then do:
-                sshCopyCommand = "pscp -pw &1 -r &2\* &3@&4:&5".
-            end.
-            else do:
-                sshCopyCommand = "sshpass -p &1 ssh -r &2/* &3@&4:&5".
-            end.
+            
+            assign sshCopyCommand = "scp -r &1" + pathSeparator + "* &2@&3:&4".
             
             for each targetDirectories where isSSH = true:
                 assign replacedCommand = substitute(
                     sshCopyCommand,
-                    targetDirectories.sshPassword,
                     sshTempBuildDir,
                     targetDirectories.sshUser,
                     targetDirectories.sshServer,
@@ -289,12 +281,7 @@ class classes.ablc.ABLCompiler:
                     "running the copy command `" + replacedCommand + "`" 
                 ).
                 
-                if opsys = "win32" then do:
-                    dos silent value(replacedCommand).
-                end.
-                else do:
-                    unix silent value(replacedCommand).
-                end.
+                os-command silent value(replacedCommand).                
             end.
         end.
     end method.
@@ -305,12 +292,7 @@ class classes.ablc.ABLCompiler:
                 "running command `" + OSCommand.commandString + "`"
                 + " of the grouper `" + pGrouper + "`"
             ).
-            if opsys = "win32" then do:
-                dos silent value(OSCommand.commandString).
-            end.
-            else do:
-                unix silent value(OSCommand.commandString).
-            end.    
+            os-command silent value(OSCommand.commandString).    
         end.
     end method.
     
