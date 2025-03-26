@@ -11,18 +11,19 @@ if not exist %ablcInstallDir% (
 	goto PROGRAMEND
 )
 
-goto GETOPTIONS
+goto GETOPTS
 
 :HELP
 
 if exist "%ablcInstallDir%\help.txt" (
-	cat "%ablcInstallDir%\help.txt"
+	powershell -c $(get-content "%ablcInstallDir%\help.txt")
 ) else (
-	cat "%~dp0help.txt"
+	powershell -c $(get-content "%~dp0help.txt")
 )
 goto PROGRAMEND
 
-:GETOPTIONS
+
+:GETOPTS
 if /I "%1" == "-h" (
 	goto HELP
 ) else if /I "%1" == "--help" (
@@ -135,7 +136,7 @@ if /I "%1" == "" (
 	goto RUNCOMPILATIONCMD
 )
 
-goto GETOPTIONS
+goto GETOPTS
 
 :RUNCOMPILATIONCMD
 if not exist %compilerScript% (
@@ -171,7 +172,7 @@ if "%extraProcedures%" == "" (
 
 %programCaller% -b -p %compilerScript% -param %compilationMode%;%compilerSpecs%;%compilerLogOutput%,%extraProcedures% %additionalArgs%
 if %quiet% == 0 if exist %compilerLogOutput% (
-	cat %compilerLogOutput%
+	powershell -c $(get-content "%compilerLogOutput%")
 )
 goto PROGRAMEND
 
