@@ -16,10 +16,11 @@ goto GETOPTS
 :HELP
 
 if exist "%ablcInstallDir%\help.txt" (
-	powershell -c $(get-content "%ablcInstallDir%\help.txt")
+	powershell -c $(get-content "%ablcInstallDir%\help.txt"^)
 ) else (
-	powershell -c $(get-content "%~dp0help.txt")
+	powershell -c $(get-content "%~dp0help.txt"^) 
 )
+
 goto PROGRAMEND
 
 
@@ -172,7 +173,7 @@ if "%extraProcedures%" == "" (
 
 %programCaller% -b -p %compilerScript% -param %compilationMode%;%compilerSpecs%;%compilerLogOutput%,%extraProcedures% %additionalArgs%
 if %quiet% == 0 if exist %compilerLogOutput% (
-	powershell -c $(get-content "%compilerLogOutput%")
+	powershell -c $(get-content "%compilerLogOutput%"^)
 )
 goto PROGRAMEND
 
