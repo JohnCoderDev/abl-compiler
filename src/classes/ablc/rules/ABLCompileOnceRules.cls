@@ -60,10 +60,8 @@ class classes.ablc.rules.ABLCompileOnceRules:
             
             if auxObject:has("server") then do:
                 assign auxChar = auxObject:getCharacter("server").
-                if not auxObject:has("user") or not auxObject:has("password") then do:
-                    return error new ABLCInputRuleError(
-                        "when specifying a server, it requires a ssh `user` and `password` strings"
-                    ).    
+                if auxObject:has("user") then do:
+                    assign auxChar = auxObject:getCharacter("user").
                 end.
             end.
         end.
